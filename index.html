@@ -3,563 +3,472 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Valentine</title>
+    <title>SmartDine - ระบบจัดการร้านอาหาร</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Mali for cute handwriting look -->
-    <link href="https://fonts.googleapis.com/css2?family=Mali:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel (for JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        body {
-            font-family: 'Mali', cursive;
-            background: linear-gradient(180deg, #ffe4e6 0%, #fda4af 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Glassmorphism Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 10px 40px rgba(244, 63, 94, 0.15);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #be123c 0%, #fb7185 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(190, 18, 60, 0.3);
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .btn-primary:active {
-            transform: scale(0.92);
-        }
-
-        /* --- ANIMATIONS --- */
-        .bg-hearts {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-            pointer-events: none;
-        }
-        .bg-heart {
-            position: absolute;
-            bottom: -50px;
-            background-color: rgba(255, 255, 255, 0.4);
-            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
-            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
-            mask-size: contain;
-            -webkit-mask-size: contain;
-            animation: floatUp linear infinite;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.8; }
-            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
-        }
-
-        .stagger-in > * {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-        .stagger-in > *:nth-child(1) { animation-delay: 0.1s; }
-        .stagger-in > *:nth-child(2) { animation-delay: 0.2s; }
-        .stagger-in > *:nth-child(3) { animation-delay: 0.3s; }
-        .stagger-in > *:nth-child(4) { animation-delay: 0.4s; }
-        .stagger-in > *:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .heart-beat { animation: heartbeat 1.5s ease-in-out infinite; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .shake { animation: shake 0.4s ease-in-out; }
-        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .spin-record { animation: spin-slow 8s linear infinite; }
-        .paused { animation-play-state: paused; }
-
-        .page {
-            display: none; opacity: 0; transition: opacity 0.4s ease;
-            width: 100%; height: 100vh; position: absolute; top: 0; left: 0;
-            overflow-y: auto; padding: 20px; box-sizing: border-box;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .page::-webkit-scrollbar { display: none; }
-        .page.active { display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; z-index: 10; }
-
-        .envelope-wrapper { perspective: 1000px; }
-        .envelope-wrapper.open .flap { transform: rotateX(180deg); z-index: 0; }
-        .envelope-wrapper.open .letter { transform: translateY(-60px); z-index: 20; transition-delay: 0.4s; }
-        .flap { transform-origin: top; transition: transform 0.6s ease-in-out, z-index 0.6s; z-index: 10; }
-        .letter { transition: transform 0.6s ease-in-out; z-index: 5; }
+        body { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
     </style>
 </head>
-<body class="text-gray-700 antialiased select-none">
+<body class="bg-gray-100 text-gray-800">
+    <div id="root"></div>
 
-    <div class="bg-hearts" id="bg-hearts"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-    <!-- PAGE 1: HOME -->
-    <div id="page-home" class="page active">
-        <div class="glass-card p-8 w-full max-w-sm text-center flex flex-col items-center stagger-in">
-            <div class="mb-6 relative">
-                <div class="absolute inset-0 bg-rose-400 blur-2xl opacity-20 rounded-full animate-pulse"></div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 24 24" fill="#be123c" stroke="#9f1239" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-lg heart-beat relative z-10"><path d="M19 14c1.49-1.28 3.6-2.34 3.6-4.44C22.59 7.05 20.35 4.8 17.82 4.8c-1.68 0-3.3 1.05-4.32 2.76C12.48 5.85 10.86 4.8 9.18 4.8 6.65 4.8 4.41 7.05 4.41 9.56c0 2.1 2.11 3.16 3.6 4.44l3.75 3.32a2.25 2.25 0 0 0 3.48 0L19 14z"></path><path d="M12 5v14"></path><path d="m15 13 4 2"></path><path d="m9 13-4 2"></path></svg>
-            </div>
-            <h1 class="text-4xl font-bold text-rose-700 mb-2 drop-shadow-sm">My Valentine</h1>
-            <p class="text-rose-500 text-sm mb-8 tracking-widest">FOR THE ONE I LOVE</p>
-            <div class="bg-white/40 rounded-2xl p-6 mb-8 w-full border border-white/50 backdrop-blur-sm">
-                <p class="text-rose-800 font-medium text-base leading-loose">
-                    "ของขวัญวาเลนไทน์ปีนี้<br>คือการมีเธออยู่ข้างๆ<br>เหมือนทุกวัน" ❤️
-                </p>
-            </div>
-            <button onclick="navigateTo('page-passcode')" class="btn-primary w-full py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">ดูเรื่องราวของเรา</button>
-        </div>
-    </div>
+        // --- ICON COMPONENT (Inline SVGs for performance in single file) ---
+        const Icons = {
+            Utensils: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>,
+            Bell: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>,
+            ChefHat: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>,
+            Users: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            ArrowLeft: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Clock: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            DollarSign: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+            LayoutGrid: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>,
+            ShoppingBag: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+            Check: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        };
 
-    <!-- PAGE 2: PASSCODE -->
-    <div id="page-passcode" class="page">
-        <div class="glass-card p-6 w-full max-w-sm text-center flex flex-col items-center stagger-in">
-            <div class="mb-4"><div class="w-16 h-16 bg-gradient-to-br from-rose-400 to-rose-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-2"><i data-lucide="lock" class="text-white w-8 h-8"></i></div></div>
-            <h2 class="text-xl font-bold text-rose-800 mb-1">กรอกรหัสผ่าน</h2>
-            <p class="text-xs text-rose-500 mb-6 bg-rose-50 px-3 py-1 rounded-full border border-rose-100">คำใบ้ : รหัสคือ 180868</p>
-            <div id="dots-container" class="flex gap-3 mb-8 justify-center">
-                <div class="w-10 h-12 border-2 border-rose-200 rounded-xl flex items-center justify-center text-xl font-bold text-rose-600 bg-white/80 transition-all duration-200" id="digit-0"></div>
-                <div class="w-10 h-12 border-2 border-rose-200 rounded-xl flex items-center justify-center text-xl font-bold text-rose-600 bg-white/80 transition-all duration-200" id="digit-1"></div>
-                <div class="w-10 h-12 border-2 border-rose-200 rounded-xl flex items-center justify-center text-xl font-bold text-rose-600 bg-white/80 transition-all duration-200" id="digit-2"></div>
-                <div class="w-10 h-12 border-2 border-rose-200 rounded-xl flex items-center justify-center text-xl font-bold text-rose-600 bg-white/80 transition-all duration-200" id="digit-3"></div>
-                <div class="w-10 h-12 border-2 border-rose-200 rounded-xl flex items-center justify-center text-xl font-bold text-rose-600 bg-white/80 transition-all duration-200" id="digit-4"></div>
-                <div class="w-10 h-12 border-2 border-rose-200 rounded-xl flex items-center justify-center text-xl font-bold text-rose-600 bg-white/80 transition-all duration-200" id="digit-5"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-3 w-full max-w-[280px]">
-                <button onclick="enterDigit(1)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">1</button>
-                <button onclick="enterDigit(2)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">2</button>
-                <button onclick="enterDigit(3)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">3</button>
-                <button onclick="enterDigit(4)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">4</button>
-                <button onclick="enterDigit(5)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">5</button>
-                <button onclick="enterDigit(6)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">6</button>
-                <button onclick="enterDigit(7)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">7</button>
-                <button onclick="enterDigit(8)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">8</button>
-                <button onclick="enterDigit(9)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">9</button>
-                <button onclick="deleteDigit()" class="h-14 bg-rose-100/50 rounded-xl text-sm font-bold text-rose-800 shadow-sm active:bg-rose-200 flex items-center justify-center transition-colors"><i data-lucide="delete" class="w-5 h-5"></i></button>
-                <button onclick="enterDigit(0)" class="h-14 bg-white/60 rounded-xl text-xl font-bold text-rose-800 shadow-sm active:bg-rose-100 transition-colors">0</button>
-                <button onclick="checkPasscode()" class="h-14 bg-rose-500 rounded-xl text-sm font-bold text-white shadow-md active:bg-rose-600 flex items-center justify-center transition-colors">ยืนยัน</button>
-            </div>
-            <p id="passcode-error" class="text-red-500 text-xs mt-4 h-4 opacity-0 transition-opacity">รหัสไม่ถูกต้อง ลองใหม่อีกครั้งนะ</p>
-        </div>
-    </div>
+        const Icon = ({ name, size = 20, className }) => {
+            const IconComp = Icons[name];
+            return IconComp ? <IconComp width={size} height={size} className={className} /> : null;
+        };
 
-    <!-- PAGE 3: SCRATCH CARD -->
-    <div id="page-secret" class="page">
-        <div class="glass-card p-6 w-full max-w-sm text-center flex flex-col items-center stagger-in">
-            <h2 class="text-2xl font-bold text-rose-800 mb-2">ความลับของเรา</h2>
-            <p class="text-rose-500 text-sm mb-6 bg-white/50 px-4 py-1 rounded-full">ขูดการ์ดเพื่อดูรูปภาพ</p>
-            <div class="relative w-64 h-72 rounded-2xl overflow-hidden shadow-xl bg-white mb-6 ring-4 ring-white/50">
-                <div class="absolute inset-0 flex flex-col items-center justify-center bg-rose-50">
-                    <!-- 🟢 แก้ไขรูปที่ซ่อนอยู่ (Scratch Card) ตรงนี้ -->
-                    <img src="https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-90" alt="Couple">
-                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/20 p-4">
-                        <div class="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg transform rotate-[-2deg]">
-                            <h3 class="text-rose-600 font-bold text-lg">Happy Valentine's Day</h3>
-                            <p class="text-xs text-rose-400 mt-1">แค่มีเธออยู่ทุกวันก็พิเศษแล้ว</p>
+        // --- MOCK DATA ---
+        const INITIAL_MENU = [
+            { id: 1, name: 'ต้มยำกุ้งน้ำข้น', price: 250, category: 'ต้ม/แกง', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTvORHpTIaX2iy0LA6_1OjNZoq2gLV5rwPzHNDY_4zFg&s=10', description: 'กุ้งแม่น้ำตัวโต น้ำซุปเข้มข้น หอมเครื่องสมุนไพร' },
+            { id: 2, name: 'ผัดไทยกุ้งสด', price: 120, category: 'จานเดียว', image: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&w=400&q=80', description: 'เส้นจันท์เหนียวนุ่ม รสชาติกลมกล่อม' },
+            { id: 3, name: 'ส้มตำไทย', price: 80, category: 'ยำ/ตำ', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkO_7lJiNGS09uEKODhflJQySBSaQ64PiDjW-NxwtIxw&s=10', description: 'มะละกอกรอบ รสชาติเปรี้ยวหวาน เผ็ดกำลังดี' },
+            { id: 4, name: 'ไก่ย่างสมุนไพร', price: 180, category: 'ย่าง/ทอด', image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=400&q=80', description: 'ไก่หมักเครื่องเทศย่างถ่าน หอมกรุ่น' },
+            { id: 5, name: 'ข้าวผัดปู', price: 150, category: 'จานเดียว', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYvoEk_SK43yHEGQU0R41gwwnzX-r7qUZHgu8O_ygm9A&s=10', description: 'ข้าวหอมมะลิผัดเนื้อปูก้อนโต' },
+            { id: 6, name: 'ปลากะพงทอดน้ำปลา', price: 450, category: 'ย่าง/ทอด', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRARC7Rq-KADhE_0LFg1G7dwU5vJ1hWqPWU1vwuuT1s-g&s=10', description: 'ปลากะพงสดทอดกรอบ ราดน้ำปลาปรุงรส' },
+            { id: 7, name: 'น้ำแตงโมปั่น', price: 60, category: 'เครื่องดื่ม', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNq_VKJIOUylbmDnd_txi11plg9H_9jg2ABCmn9SoxwQ&s=10', description: 'หวานเย็นชื่นใจ ดับกระหาย' },
+        ];
+
+        const TABLES = [
+            { id: 'A1', name: 'โต๊ะ A1', zone: 'Indoor' },
+            { id: 'A2', name: 'โต๊ะ A2', zone: 'Indoor' },
+            { id: 'B1', name: 'โต๊ะ B1', zone: 'Outdoor' },
+            { id: 'B2', name: 'โต๊ะ B2', zone: 'Outdoor' },
+        ];
+
+        const CATEGORIES = ['ทั้งหมด', 'ต้ม/แกง', 'จานเดียว', 'ยำ/ตำ', 'ย่าง/ทอด', 'เครื่องดื่ม'];
+
+        // --- APP COMPONENT ---
+        function App() {
+            // State
+            const [view, setView] = useState('landing');
+            const [currentTable, setCurrentTable] = useState(null);
+            const [orders, setOrders] = useState([]);
+            const [cart, setCart] = useState([]);
+            const [notifications, setNotifications] = useState([]);
+            const [activeTab, setActiveTab] = useState('ทั้งหมด');
+            const [isCartOpen, setIsCartOpen] = useState(false);
+            const [selectedItem, setSelectedItem] = useState(null);
+            const [itemOptions, setItemOptions] = useState({ spicy: 'ปกติ', note: '' });
+
+            // Actions
+            const addToCart = (item) => {
+                setCart(prev => {
+                    const existing = prev.find(i => i.id === item.id && i.spicy === itemOptions.spicy && i.note === itemOptions.note);
+                    if (existing) {
+                        return prev.map(i => i === existing ? { ...i, quantity: i.quantity + 1 } : i);
+                    }
+                    return [...prev, { ...item, quantity: 1, spicy: itemOptions.spicy, note: itemOptions.note }];
+                });
+                setSelectedItem(null);
+                setItemOptions({ spicy: 'ปกติ', note: '' });
+            };
+
+            const placeOrder = () => {
+                if (cart.length === 0) return;
+                const newOrder = {
+                    orderId: `ORD-${Math.floor(Math.random() * 10000)}`,
+                    tableId: currentTable.id,
+                    items: cart,
+                    status: 'pending',
+                    timestamp: new Date(),
+                };
+                setOrders(prev => [...prev, newOrder]);
+                setCart([]);
+                setIsCartOpen(false);
+                alert('ส่งออเดอร์เรียบร้อยครับ! ครัวได้รับรายการแล้ว');
+            };
+
+            const callStaff = (type) => {
+                const newNotif = {
+                    id: Date.now(),
+                    tableId: currentTable.id,
+                    type: type,
+                    message: type === 'bill' ? 'ขอเช็คบิล' : 'เรียกพนักงาน',
+                    time: new Date()
+                };
+                setNotifications(prev => [...prev, newNotif]);
+                alert(type === 'bill' ? 'แจ้งเช็คบิลแล้ว กรุณารอสักครู่' : 'พนักงานกำลังไปที่โต๊ะครับ');
+            };
+
+            const updateOrderStatus = (orderId, newStatus) => {
+                setOrders(prev => prev.map(o => o.orderId === orderId ? { ...o, status: newStatus } : o));
+            };
+
+            const clearNotification = (id) => {
+                setNotifications(prev => prev.filter(n => n.id !== id));
+            };
+
+            const closeTableBill = (tableId) => {
+                setOrders(prev => prev.map(o => o.tableId === tableId ? { ...o, status: 'paid' } : o));
+                setNotifications(prev => prev.filter(n => n.tableId !== tableId));
+                alert(`ปิดบิลโต๊ะ ${tableId} เรียบร้อย`);
+            };
+
+            // Computed
+            const activeOrders = orders.filter(o => o.status !== 'paid');
+            const kitchenOrders = activeOrders.filter(o => o.status === 'pending' || o.status === 'cooking');
+            
+            const getTableStatus = (tableId) => {
+                const tableOrders = activeOrders.filter(o => o.tableId === tableId);
+                const tableNotifs = notifications.filter(n => n.tableId === tableId);
+                if (tableNotifs.some(n => n.type === 'bill')) return 'payment';
+                if (tableOrders.length > 0) return 'occupied';
+                return 'free';
+            };
+
+            // --- VIEWS ---
+            
+            // 1. Landing View
+            if (view === 'landing') {
+                return (
+                    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-6 text-white relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-purple-600/20 z-0"></div>
+                        <div className="z-10 text-center max-w-md w-full animate-fade-in">
+                            <div className="w-20 h-20 bg-orange-500 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
+                                <Icon name="Utensils" size={40} className="text-white" />
+                            </div>
+                            <h1 className="text-4xl font-bold mb-2">ครัวดุ๊กดุ๋ย</h1>
+                            <p className="text-gray-400 mb-10">ครัวดุ๊กดุ๋ยยินดีต้อนรับ</p>
+
+                            <div className="space-y-4">
+                                <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 backdrop-blur-sm">
+                                    <h3 className="text-lg font-semibold mb-4 text-orange-400 flex items-center justify-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M7 12h.01"/><path d="M7 17h.01"/><path d="M12 7h.01"/><path d="M12 12h.01"/><path d="M12 17h.01"/><path d="M17 7h.01"/><path d="M17 12h.01"/><path d="M17 17h.01"/></svg>
+                                        สแกน QR Code (ลูกค้า)
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {TABLES.map(table => (
+                                            <button key={table.id} onClick={() => { setCurrentTable(table); setView('customer'); }} 
+                                                className="p-3 bg-gray-700 hover:bg-orange-600 rounded-xl transition-colors flex flex-col items-center group">
+                                                <span className="font-bold group-hover:text-white">{table.name}</span>
+                                                <span className="text-xs text-gray-400 group-hover:text-gray-200">{table.zone}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-800">
+                                    <button onClick={() => setView('kitchen')} className="p-4 bg-blue-600 hover:bg-blue-700 rounded-xl flex flex-col items-center justify-center gap-2 font-semibold transition-transform active:scale-95">
+                                        <Icon name="ChefHat" size={24} /> ครัว
+                                    </button>
+                                    <button onClick={() => setView('staff')} className="p-4 bg-purple-600 hover:bg-purple-700 rounded-xl flex flex-col items-center justify-center gap-2 font-semibold transition-transform active:scale-95">
+                                        <Icon name="Users" size={24} /> พนักงาน
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <canvas id="scratch-canvas" class="absolute inset-0 w-full h-full cursor-pointer z-10 touch-none"></canvas>
-            </div>
-            <p class="text-rose-400 text-xs mb-6 animate-pulse">ใช้นิ้วถูเบาๆ บนรูปภาพ</p>
-            <button onclick="navigateTo('page-menu')" class="btn-primary px-10 py-3 rounded-full font-bold shadow-lg text-sm">ไปหน้าเมนู</button>
-        </div>
-    </div>
-
-    <!-- PAGE 4: MAIN MENU -->
-    <div id="page-menu" class="page">
-        <div class="glass-card p-6 w-full max-w-sm text-center stagger-in">
-            <h2 class="text-2xl font-bold text-rose-800 mb-8">เลือกเมนู</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <div onclick="navigateTo('page-memories')" class="bg-white/70 hover:bg-white p-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center h-32 group">
-                    <div class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 rounded-2xl flex items-center justify-center mb-3 transition-colors"><i data-lucide="image" class="text-rose-500 w-6 h-6"></i></div>
-                    <h3 class="font-bold text-rose-700 text-sm">ความทรงจำ</h3>
-                    <p class="text-[10px] text-gray-400">เรื่องราวเล็กๆ</p>
-                </div>
-                <div onclick="navigateTo('page-letter')" class="bg-white/70 hover:bg-white p-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center h-32 group">
-                    <div class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 rounded-2xl flex items-center justify-center mb-3 transition-colors"><i data-lucide="mail-heart" class="text-rose-500 w-6 h-6"></i></div>
-                    <h3 class="font-bold text-rose-700 text-sm">จดหมาย</h3>
-                    <p class="text-[10px] text-gray-400">ข้อความจากใจ</p>
-                </div>
-                <div onclick="resetQuiz(); navigateTo('page-quiz')" class="bg-white/70 hover:bg-white p-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center h-32 group">
-                    <div class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 rounded-2xl flex items-center justify-center mb-3 transition-colors"><i data-lucide="help-circle" class="text-rose-500 w-6 h-6"></i></div>
-                    <h3 class="font-bold text-rose-700 text-sm">แบบทดสอบ</h3>
-                    <p class="text-[10px] text-gray-400">รู้จักเราดีแค่ไหน</p>
-                </div>
-                <div onclick="navigateTo('page-timer')" class="bg-white/70 hover:bg-white p-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center h-32 group">
-                    <div class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 rounded-2xl flex items-center justify-center mb-3 transition-colors"><i data-lucide="clock" class="text-rose-500 w-6 h-6"></i></div>
-                    <h3 class="font-bold text-rose-700 text-sm">เวลาของเรา</h3>
-                    <p class="text-[10px] text-gray-400">คบกันมานานเท่าไหร่</p>
-                </div>
-                <div onclick="navigateTo('page-polaroid')" class="bg-white/70 hover:bg-white p-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center h-32 group">
-                    <div class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 rounded-2xl flex items-center justify-center mb-3 transition-colors"><i data-lucide="camera" class="text-rose-500 w-6 h-6"></i></div>
-                    <h3 class="font-bold text-rose-700 text-sm">ถ่ายโพลารอยด์</h3>
-                    <p class="text-[10px] text-gray-400">เก็บภาพเรา</p>
-                </div>
-                 <div onclick="navigateTo('page-music')" class="bg-white/70 hover:bg-white p-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center h-32 group">
-                    <div class="w-12 h-12 bg-rose-100 group-hover:bg-rose-200 rounded-2xl flex items-center justify-center mb-3 transition-colors"><i data-lucide="music" class="text-rose-500 w-6 h-6"></i></div>
-                    <h3 class="font-bold text-rose-700 text-sm">เพลงของเรา</h3>
-                    <p class="text-[10px] text-gray-400">เปิดเพลงนี้</p>
-                </div>
-            </div>
-            <button onclick="navigateTo('page-home')" class="px-6 py-2 text-rose-500 text-sm hover:text-rose-700 transition-colors"><i data-lucide="arrow-left" class="inline w-4 h-4 mr-1"></i> กลับหน้าแรก</button>
-        </div>
-    </div>
-
-    <!-- FEATURE: MEMORIES -->
-    <div id="page-memories" class="page">
-        <div class="glass-card p-6 w-full max-w-sm flex flex-col items-center stagger-in">
-            <h2 class="text-xl font-bold text-rose-800 mb-4 flex items-center gap-2"><i data-lucide="image" class="w-5 h-5"></i> ความทรงจำ</h2>
-            <div class="relative w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-6 shadow-md group">
-                <img id="memory-img" src="" class="w-full h-full object-cover transition-all duration-700 transform hover:scale-105">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
-                <button onclick="prevMemory()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2 rounded-full hover:bg-white/40 text-white transition-all"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
-                <button onclick="nextMemory()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2 rounded-full hover:bg-white/40 text-white transition-all"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
-            </div>
-            <div class="text-center w-full mb-6">
-                <h3 id="memory-title" class="font-bold text-rose-700 text-xl mb-2">วันแรก...</h3>
-                <p id="memory-desc" class="text-gray-500 text-sm font-light">รายละเอียดความทรงจำ...</p>
-            </div>
-            <div class="flex gap-2 mb-6" id="memory-dots">
-                <!-- Dots injected by JS -->
-            </div>
-            <button onclick="navigateTo('page-menu')" class="bg-rose-100 text-rose-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-rose-200 transition-colors">กลับไปหน้าเมนู</button>
-        </div>
-    </div>
-
-    <!-- FEATURE: LETTER -->
-    <div id="page-letter" class="page">
-        <div class="glass-card p-6 w-full max-w-sm flex flex-col items-center stagger-in">
-            <h2 class="text-xl font-bold text-rose-800 mb-2">จดหมายถึงเธอ</h2>
-            <p class="text-xs text-rose-400 mb-12 bg-white/50 px-3 py-1 rounded-full">กดที่ซองเพื่อเปิดอ่าน</p>
-            <div class="envelope-wrapper relative w-72 h-48 cursor-pointer mb-24" onclick="toggleLetter(this)">
-                <div class="absolute bottom-0 w-full h-full bg-rose-500 rounded-b-xl shadow-2xl z-10"></div>
-                <div class="absolute bottom-0 w-full h-full bg-rose-600 rounded-b-xl clip-path-triangle z-20" style="clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%); opacity: 0.3"></div>
-                <div class="flap absolute top-0 w-full h-1/2 bg-rose-700 rounded-t-xl origin-top" style="clip-path: polygon(0 0, 100% 0, 50% 100%); height: 100%;"></div>
-                <div class="letter absolute bottom-2 left-2 right-2 top-4 bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center text-center border border-gray-100">
-                    <i data-lucide="heart" class="text-rose-500 w-5 h-5 mb-3 fill-current animate-pulse"></i>
-                    <p class="text-xs text-gray-600 leading-relaxed font-medium">"เราอาจจะไม่ใช่คนที่พูดคำหวานเก่ง ไม่ได้เก่งเรื่องแสดงออกเท่าไหร่ แต่ทุกครั้งที่มีเธออยู่ข้างๆ โลกมันดูอ่อนโยนขึ้นเสมอ... ขอบคุณที่รักกันนะ"</p>
-                    <p class="text-[10px] text-rose-400 mt-4 w-full text-right font-bold">- รักเธอที่สุด -</p>
-                </div>
-            </div>
-            <button onclick="navigateTo('page-menu')" class="bg-rose-100 text-rose-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-rose-200 transition-colors mt-6">กลับไปหน้าเมนู</button>
-        </div>
-    </div>
-
-    <!-- FEATURE: QUIZ -->
-    <div id="page-quiz" class="page">
-        <div class="glass-card p-6 w-full max-w-sm flex flex-col items-center stagger-in">
-            <div class="w-full flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-rose-800">รู้จักเราดีแค่ไหน</h2>
-                <span class="text-xs bg-rose-100 text-rose-600 px-2 py-1 rounded-md font-bold">ข้อที่ <span id="quiz-current">1</span>/5</span>
-            </div>
-            <div class="w-full bg-white rounded-2xl p-8 mb-6 text-center shadow-sm relative min-h-[120px] flex items-center justify-center">
-                <div class="absolute -top-3 -left-3 bg-rose-500 text-white p-2 rounded-full shadow-md"><i data-lucide="help-circle" class="w-4 h-4"></i></div>
-                <p id="quiz-question" class="text-gray-700 font-bold text-lg leading-relaxed">คำถามอยู่ที่นี่?</p>
-            </div>
-            <div id="quiz-options" class="w-full flex flex-col gap-3 mb-4"></div>
-             <div id="quiz-result" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xl z-20 flex-col items-center justify-center rounded-24 transition-opacity duration-300">
-                <div class="text-6xl mb-4 animate-bounce">🏆</div>
-                <h3 class="text-2xl font-bold text-rose-600 mb-2">คะแนนของเธอ</h3>
-                <div class="text-5xl font-bold text-gray-800 mb-2"><span id="quiz-score-display">0</span><span class="text-2xl text-gray-400">/5</span></div>
-                <p id="quiz-msg" class="text-rose-400 text-sm mb-8">เก่งมาก!</p>
-                <button onclick="navigateTo('page-menu')" class="btn-primary px-8 py-3 rounded-full text-sm font-bold shadow-lg">กลับไปหน้าเมนู</button>
-             </div>
-        </div>
-    </div>
-
-    <!-- FEATURE: TIMER -->
-    <div id="page-timer" class="page">
-        <div class="glass-card p-6 w-full max-w-sm flex flex-col items-center stagger-in text-center">
-            <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-4 animate-[pulse_3s_infinite]"><i data-lucide="heart" class="text-rose-500 w-8 h-8 fill-rose-500 heart-beat"></i></div>
-            <h2 class="text-xl font-bold text-rose-800 mb-1">ระยะเวลาของเรา</h2>
-            <p class="text-xs text-rose-400 mb-8">นับตั้งแต่วันแรกที่คบกัน</p>
-            <div class="bg-gradient-to-r from-rose-500 to-pink-500 text-white w-full rounded-2xl p-6 mb-6 shadow-lg relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="calendar" class="w-16 h-16"></i></div>
-                <div class="relative z-10"><span class="text-sm opacity-90 block mb-1">ผ่านไปแล้ว...</span><div class="flex items-baseline justify-center gap-2"><span id="timer-days" class="text-6xl font-bold tracking-tighter">0</span><span class="text-xl">วัน</span></div></div>
-            </div>
-            <div class="grid grid-cols-3 gap-3 w-full mb-8">
-                <div class="bg-white/60 p-3 rounded-xl flex flex-col items-center shadow-sm"><span id="timer-hours" class="text-2xl font-bold text-rose-600">00</span><span class="text-[10px] text-gray-500 uppercase">ชั่วโมง</span></div>
-                <div class="bg-white/60 p-3 rounded-xl flex flex-col items-center shadow-sm"><span id="timer-minutes" class="text-2xl font-bold text-rose-600">00</span><span class="text-[10px] text-gray-500 uppercase">นาที</span></div>
-                <div class="bg-white/60 p-3 rounded-xl flex flex-col items-center shadow-sm"><span id="timer-seconds" class="text-2xl font-bold text-rose-600">00</span><span class="text-[10px] text-gray-500 uppercase">วินาที</span></div>
-            </div>
-            <p class="text-xs text-gray-400 italic mb-6">"ทุกวินาทีมีความหมาย เมื่อมีเธอ"</p>
-            <button onclick="navigateTo('page-menu')" class="bg-white text-rose-500 border border-rose-200 w-full py-3 rounded-full text-sm font-bold hover:bg-rose-50 transition-colors">กลับไปหน้าเมนู</button>
-        </div>
-    </div>
-
-    <!-- FEATURE: POLAROID -->
-    <div id="page-polaroid" class="page">
-        <div class="glass-card p-6 w-full max-w-sm flex flex-col items-center stagger-in">
-            <h2 class="text-xl font-bold text-rose-800 mb-1">ถ่ายรูปโพลารอยด์</h2>
-            <p class="text-xs text-rose-500 mb-6">เก็บช่วงเวลาน่ารักของเราไว้</p>
-            <div id="camera-view" class="w-64 h-80 bg-gray-800 rounded-lg relative flex items-center justify-center overflow-hidden mb-8 border-[6px] border-white shadow-xl ring-1 ring-gray-200">
-                <div class="text-center group"><i data-lucide="camera" class="w-12 h-12 text-gray-500 mx-auto mb-2 group-hover:text-white transition-colors"></i><p class="text-gray-500 text-xs">Lens View</p></div>
-                <div id="shutter-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-150 z-20"></div>
-                <img id="polaroid-result" src="https://images.unsplash.com/photo-1529634597503-139d3726d515?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="absolute inset-0 w-full h-full object-cover hidden z-10 transition-transform duration-[5s] hover:scale-110">
-                 <div class="absolute bottom-4 left-0 w-full text-center z-10 pointer-events-none"><p class="text-white/80 text-[10px] tracking-widest font-light drop-shadow-md hidden" id="polaroid-date">VALENTINE 2025</p></div>
-            </div>
-            <button id="btn-snap" onclick="takePhoto()" class="btn-primary w-16 h-16 rounded-full font-bold shadow-lg flex items-center justify-center border-4 border-rose-200 active:border-rose-400 transition-all mb-4"><i data-lucide="aperture" class="w-8 h-8"></i></button>
-            <p class="text-xs text-gray-400">กดปุ่มเพื่อถ่ายภาพ</p>
-            <button onclick="resetPolaroid(); navigateTo('page-menu')" class="mt-6 text-sm text-rose-500 font-bold hover:underline">กลับไปหน้าเมนู</button>
-        </div>
-    </div>
-
-     <!-- FEATURE: MUSIC -->
-     <div id="page-music" class="page">
-        <div class="glass-card p-6 w-full max-w-sm flex flex-col items-center stagger-in">
-            <h2 class="text-xl font-bold text-rose-800 mb-1">เพลงของเรา</h2>
-            <p class="text-xs text-rose-500 mb-8">เพลงนี้อยากให้เธอฟัง</p>
-            <div class="relative w-64 h-64 rounded-full bg-zinc-900 border-4 border-gray-800 shadow-2xl flex items-center justify-center mb-8 spin-record paused ring-4 ring-rose-100" id="vinyl">
-                <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
-                <div class="absolute inset-2 rounded-full border border-gray-800 opacity-50"></div>
-                <div class="absolute inset-6 rounded-full border border-gray-800 opacity-50"></div>
-                <div class="absolute inset-10 rounded-full border border-gray-800 opacity-50"></div>
-                <div class="absolute inset-14 rounded-full border border-gray-800 opacity-50"></div>
-                <div class="w-28 h-28 rounded-full bg-rose-200 overflow-hidden border-4 border-zinc-800 relative z-10">
-                    <!-- 🟢 แก้ไขปกเพลง (Vinyl Cover) ตรงนี้ -->
-                    <img src="https://images.unsplash.com/photo-1516280440614-6697288d5d38?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover">
-                </div>
-            </div>
-            <div class="bg-white/60 p-4 rounded-xl text-center mb-6 w-full shadow-sm">
-                <div class="flex items-center justify-center gap-2 mb-2"><span class="w-1 h-4 bg-rose-400 rounded-full animate-[bounce_1s_infinite]"></span><span class="w-1 h-6 bg-rose-500 rounded-full animate-[bounce_1.2s_infinite]"></span><span class="w-1 h-3 bg-rose-400 rounded-full animate-[bounce_0.8s_infinite]"></span></div>
-                <p class="text-xs text-gray-600 leading-relaxed italic">"เพลงนี้อาจไม่ได้พิเศษสำหรับใคร <br>แต่สำหรับเรามันคือความรู้สึกที่มีให้เธอ"</p>
-            </div>
-            <!-- 🟢 แก้ไขลิงก์ YouTube ตรงนี้ (href) -->
-            <a href="https://www.youtube.com/watch?v=k-VdXXu8VqQ" target="_blank" onclick="playMusicState()" class="btn-primary w-full py-3 rounded-full font-bold shadow-lg mb-2 flex items-center justify-center gap-2 hover:scale-105 transition-transform"><i data-lucide="play-circle" class="w-5 h-5"></i> เปิดเพลงนี้บน YouTube</a>
-            <button onclick="navigateTo('page-menu')" class="bg-white text-rose-500 w-full py-2 rounded-full text-sm font-bold shadow-sm hover:bg-rose-50">กลับไปหน้าเมนู</button>
-        </div>
-    </div>
-
-
-    <!-- ================= JAVASCRIPT ================= -->
-    <script>
-        lucide.createIcons();
-
-        // --- BACKGROUND HEARTS ---
-        function createFloatingHearts() {
-            const container = document.getElementById('bg-hearts');
-            const heartCount = 15; 
-            for(let i=0; i<heartCount; i++) {
-                const heart = document.createElement('div'); heart.classList.add('bg-heart');
-                const left = Math.random() * 100; const duration = Math.random() * 10 + 10; const delay = Math.random() * 10; const scale = Math.random() * 0.5 + 0.5;
-                heart.style.left = `${left}%`; heart.style.animationDuration = `${duration}s`; heart.style.animationDelay = `${delay}s`; heart.style.transform = `scale(${scale})`;
-                container.appendChild(heart);
+                );
             }
-        }
-        createFloatingHearts();
 
-        // --- NAVIGATION ---
-        function navigateTo(pageId) {
-            const currentActive = document.querySelector('.page.active');
-            if(currentActive && currentActive.id === pageId) return;
-            if(currentActive) {
-                currentActive.style.opacity = 0; currentActive.classList.remove('active');
-                setTimeout(() => { currentActive.style.display = 'none'; showNewPage(pageId); }, 400); 
-            } else { showNewPage(pageId); }
-        }
-        function showNewPage(pageId) {
-            const target = document.getElementById(pageId);
-            target.style.display = 'flex'; void target.offsetWidth; target.style.opacity = 1; target.classList.add('active');
-            if(pageId === 'page-secret') initScratchCard();
-            if(pageId === 'page-timer') startTimer();
-        }
+            // 2. Customer View
+            if (view === 'customer') {
+                const filteredMenu = activeTab === 'ทั้งหมด' ? INITIAL_MENU : INITIAL_MENU.filter(m => m.category === activeTab);
+                const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const myOrders = orders.filter(o => o.tableId === currentTable.id && o.status !== 'paid');
 
-        // --- PASSCODE ---
-        let currentPasscode = "";
-        const correctPasscode = "180868"; // 🟢 แก้ไขรหัสผ่านที่นี่
-        function enterDigit(digit) {
-            if (currentPasscode.length < 6) {
-                currentPasscode += digit; updatePasscodeUI();
-                if(navigator.vibrate) navigator.vibrate(50);
+                return (
+                    <div className="min-h-screen bg-gray-50 pb-24 animate-fade-in">
+                        {/* Header */}
+                        <div className="bg-white sticky top-0 z-20 shadow-sm px-4 py-3 flex justify-between items-center">
+                            <div>
+                                <h2 className="font-bold text-lg text-gray-800">SmartDine</h2>
+                                <div className="flex items-center gap-1 text-sm text-orange-600 font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    {currentTable.name} ({currentTable.zone})
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={() => callStaff('call')} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"><Icon name="Bell" size={20}/></button>
+                                <button onClick={() => setView('landing')} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"><Icon name="ArrowLeft" size={20}/></button>
+                            </div>
+                        </div>
+
+                        {/* Categories */}
+                        <div className="overflow-x-auto py-4 px-4 flex gap-3 no-scrollbar sticky top-14 bg-gray-50 z-10">
+                            {CATEGORIES.map(cat => (
+                                <button key={cat} onClick={() => setActiveTab(cat)} className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === cat ? 'bg-orange-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}>
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Menu List */}
+                        <div className="px-4 grid grid-cols-1 gap-4">
+                            {filteredMenu.map(item => (
+                                <div key={item.id} className="bg-white rounded-2xl p-3 shadow-sm flex gap-4 border border-gray-100" onClick={() => setSelectedItem(item)}>
+                                    <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 relative">
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                                    </div>
+                                    <div className="flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <h3 className="font-bold text-gray-800 leading-tight mb-1">{item.name}</h3>
+                                            <p className="text-xs text-gray-400 line-clamp-2">{item.description}</p>
+                                        </div>
+                                        <div className="flex justify-between items-end mt-2">
+                                            <span className="font-bold text-orange-600 text-lg">฿{item.price}</span>
+                                            <button className="bg-gray-900 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Bottom Bar */}
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-8 z-30 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                            {myOrders.length > 0 && (
+                                <div className="mb-3 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                    {myOrders.map(order => (
+                                        <div key={order.orderId} className="flex-shrink-0 bg-blue-50 border border-blue-100 px-3 py-2 rounded-lg text-sm min-w-[120px]">
+                                            <div className="flex items-center gap-1 text-blue-700 font-bold text-xs mb-1">
+                                                <Icon name="Clock" size={12} /> {order.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                            </div>
+                                            <div className={`text-xs font-medium px-2 py-0.5 rounded-full inline-block ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : order.status === 'cooking' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                                                {order.status === 'pending' ? 'รอคิว' : order.status === 'cooking' ? 'กำลังทำ' : 'เสิร์ฟแล้ว'}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            
+                            <div className="flex gap-3">
+                                <button onClick={() => callStaff('bill')} className="flex-1 border border-gray-300 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-50 active:scale-95 transition-transform">เช็คบิล</button>
+                                <button onClick={() => setIsCartOpen(true)} className="flex-[2] bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-600/30 flex justify-between px-6 hover:bg-orange-700 active:scale-95 transition-all">
+                                    <span>ตะกร้า ({cart.reduce((a,b)=>a+b.quantity,0)})</span>
+                                    <span>฿{cartTotal}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Product Modal */}
+                        {selectedItem && (
+                            <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+                                <div className="bg-white w-full max-w-sm rounded-3xl p-6 relative animate-slide-up">
+                                    <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full"><Icon name="X" size={16}/></button>
+                                    <div className="flex gap-4 mb-4">
+                                        <img src={selectedItem.image} className="w-20 h-20 rounded-xl object-cover" />
+                                        <div>
+                                            <h3 className="text-xl font-bold">{selectedItem.name}</h3>
+                                            <div className="text-orange-600 font-bold text-lg">฿{selectedItem.price}</div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="text-sm font-semibold text-gray-600 block mb-2">ระดับความเผ็ด</label>
+                                            <div className="flex gap-2">
+                                                {['ไม่เผ็ด', 'ปกติ', 'เผ็ดมาก'].map(lvl => (
+                                                    <button key={lvl} onClick={() => setItemOptions({...itemOptions, spicy: lvl})} className={`flex-1 py-2 rounded-lg text-sm border transition-colors ${itemOptions.spicy === lvl ? 'border-orange-500 bg-orange-50 text-orange-700 font-bold' : 'border-gray-200'}`}>{lvl}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-semibold text-gray-600 block mb-2">ข้อความถึงครัว</label>
+                                            <input type="text" placeholder="เช่น ไม่ใส่ผักชี" className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500" value={itemOptions.note} onChange={(e) => setItemOptions({...itemOptions, note: e.target.value})} />
+                                        </div>
+                                        <button onClick={() => addToCart(selectedItem)} className="w-full bg-orange-600 text-white font-bold py-3 rounded-xl mt-4 active:scale-95 transition-transform">เพิ่มลงตะกร้า</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Cart Modal */}
+                        {isCartOpen && (
+                            <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center backdrop-blur-sm animate-fade-in">
+                                <div className="bg-white w-full max-w-lg rounded-t-3xl p-6 h-[80vh] flex flex-col animate-slide-up">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-xl font-bold">รายการที่เลือก</h2>
+                                        <button onClick={() => setIsCartOpen(false)} className="p-2 bg-gray-100 rounded-full"><Icon name="X" size={20}/></button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto space-y-4 no-scrollbar">
+                                        {cart.length === 0 ? <div className="text-center text-gray-400 mt-20">ยังไม่มีรายการอาหาร</div> : 
+                                            cart.map((item, idx) => (
+                                                <div key={idx} className="flex justify-between items-start border-b border-gray-100 pb-4">
+                                                    <div className="flex gap-3">
+                                                        <div className="bg-gray-100 w-8 h-8 rounded flex items-center justify-center font-bold text-sm">{item.quantity}x</div>
+                                                        <div>
+                                                            <div className="font-bold text-gray-800">{item.name}</div>
+                                                            <div className="text-xs text-gray-500">เผ็ด: {item.spicy} {item.note && `, ${item.note}`}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="font-bold text-gray-700">฿{item.price * item.quantity}</div>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                    <div className="mt-4 border-t border-gray-100 pt-4">
+                                        <div className="flex justify-between text-lg font-bold mb-4"><span>ยอดรวม</span><span className="text-orange-600">฿{cartTotal}</span></div>
+                                        <button onClick={placeOrder} disabled={cart.length === 0} className="w-full bg-green-600 disabled:bg-gray-300 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform">ยืนยันการสั่งอาหาร</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
             }
-        }
-        function deleteDigit() { currentPasscode = currentPasscode.slice(0, -1); updatePasscodeUI(); document.getElementById('passcode-error').style.opacity = 0; }
-        function updatePasscodeUI() {
-            for (let i = 0; i < 6; i++) {
-                const el = document.getElementById(`digit-${i}`);
-                if (i < currentPasscode.length) { el.textContent = currentPasscode[i]; el.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-700', 'scale-110'); el.classList.remove('bg-white/80', 'border-rose-200'); } 
-                else { el.textContent = ""; el.classList.remove('bg-rose-100', 'border-rose-400', 'text-rose-700', 'scale-110'); el.classList.add('bg-white/80', 'border-rose-200'); }
+
+            // 3. Kitchen View
+            if (view === 'kitchen') {
+                return (
+                    <div className="min-h-screen bg-slate-900 text-white p-6 animate-fade-in">
+                        <div className="flex justify-between items-center mb-8 sticky top-0 bg-slate-900 z-10 py-4 border-b border-slate-800">
+                            <h1 className="text-3xl font-bold flex items-center gap-3"><Icon name="ChefHat" className="text-orange-400" size={32} /> Kitchen Display</h1>
+                            <button onClick={() => setView('landing')} className="px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 text-sm">ออก</button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {kitchenOrders.length === 0 && <div className="col-span-full text-center py-20 text-slate-600 text-xl">ไม่มีออเดอร์ค้างในระบบ</div>}
+                            {kitchenOrders.map(order => (
+                                <div key={order.orderId} className={`rounded-xl border-l-4 overflow-hidden shadow-lg ${order.status === 'pending' ? 'bg-slate-800 border-yellow-500' : 'bg-slate-800 border-orange-500'}`}>
+                                    <div className={`p-3 flex justify-between items-center ${order.status === 'pending' ? 'bg-yellow-500/10' : 'bg-orange-500/10'}`}>
+                                        <div><div className="text-xl font-bold">{TABLES.find(t=>t.id===order.tableId)?.name}</div><div className="text-xs opacity-70">#{order.orderId}</div></div>
+                                        <div className="text-right"><div className="font-mono font-bold text-lg">{order.timestamp.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div></div>
+                                    </div>
+                                    <div className="p-4 space-y-3">
+                                        {order.items.map((item, idx) => (
+                                            <div key={idx} className="flex justify-between items-start border-b border-slate-700 pb-2 last:border-0">
+                                                <div className="flex gap-2">
+                                                    <span className="font-bold text-orange-400 text-lg">{item.quantity}</span>
+                                                    <div><div className="font-medium">{item.name}</div>{(item.spicy !== 'ปกติ' || item.note) && <div className="text-sm text-yellow-300">{item.spicy !== 'ปกติ' && `• ${item.spicy} `} {item.note && `• ${item.note}`}</div>}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="p-3 bg-slate-900/50">
+                                        {order.status === 'pending' ? 
+                                            <button onClick={() => updateOrderStatus(order.orderId, 'cooking')} className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg">รับออเดอร์ / เริ่มทำ</button> :
+                                            <button onClick={() => updateOrderStatus(order.orderId, 'served')} className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg">เสร็จแล้ว / พร้อมเสิร์ฟ</button>
+                                        }
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
             }
-        }
-        function checkPasscode() {
-            if (currentPasscode === correctPasscode) {
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#fb7185', '#be123c', '#ffffff'] });
-                navigateTo('page-secret');
-            } else {
-                const dots = document.getElementById('dots-container'); dots.classList.add('shake');
-                const err = document.getElementById('passcode-error'); err.style.opacity = 1;
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                setTimeout(() => dots.classList.remove('shake'), 400);
-                currentPasscode = ""; updatePasscodeUI();
+
+            // 4. Staff View
+            if (view === 'staff') {
+                return (
+                    <div className="min-h-screen bg-gray-100 font-sans flex flex-col md:flex-row animate-fade-in">
+                        {/* Sidebar */}
+                        <div className="w-full md:w-64 bg-white shadow-xl z-20 flex-shrink-0 flex flex-col h-screen overflow-hidden">
+                            <div className="p-6 border-b border-gray-100">
+                                <h1 className="text-2xl font-bold text-purple-700 flex items-center gap-2"><Icon name="Users" /> Staff / POS</h1>
+                                <button onClick={() => setView('landing')} className="text-sm text-gray-500 mt-2 hover:text-gray-800">กลับหน้าหลัก</button>
+                            </div>
+                            <div className="p-4 flex-1 overflow-y-auto">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">การแจ้งเตือน ({notifications.length})</h3>
+                                <div className="space-y-2">
+                                    {notifications.length === 0 && <div className="text-sm text-gray-400 text-center py-4">ไม่มีการแจ้งเตือน</div>}
+                                    {notifications.map(n => (
+                                        <div key={n.id} className={`p-3 rounded-xl border-l-4 shadow-sm animate-fade-in ${n.type === 'bill' ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="font-bold text-gray-800">{TABLES.find(t=>t.id===n.tableId)?.name}</span>
+                                                <button onClick={() => clearNotification(n.id)} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={14}/></button>
+                                            </div>
+                                            <div className={`text-sm font-medium ${n.type === 'bill' ? 'text-green-700' : 'text-red-700'}`}>{n.message}</div>
+                                            <div className="text-xs text-gray-400 mt-1">{n.time.toLocaleTimeString()}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        {/* Main Content */}
+                        <div className="flex-1 p-6 overflow-y-auto h-screen">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><Icon name="LayoutGrid" /></div>
+                                    <div><div className="text-2xl font-bold">{TABLES.length}</div><div className="text-sm text-gray-500">โต๊ะทั้งหมด</div></div>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600"><Icon name="ShoppingBag" /></div>
+                                    <div><div className="text-2xl font-bold">{activeOrders.length}</div><div className="text-sm text-gray-500">ออเดอร์ Active</div></div>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600"><Icon name="DollarSign" /></div>
+                                    <div><div className="text-2xl font-bold">฿{orders.filter(o=>o.status==='paid').reduce((sum,o) => sum + o.items.reduce((s,i)=>s+(i.price*i.quantity),0),0)}</div><div className="text-sm text-gray-500">ยอดขายวันนี้</div></div>
+                                </div>
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4">ผังร้าน / สถานะโต๊ะ</h2>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {TABLES.map(table => {
+                                    const status = getTableStatus(table.id);
+                                    const tableOrders = activeOrders.filter(o => o.tableId === table.id);
+                                    const total = tableOrders.reduce((sum, o) => sum + o.items.reduce((s, i) => s + (i.price * i.quantity), 0), 0);
+                                    
+                                    let cardClass = 'bg-white border-gray-200';
+                                    let statusBadge = 'bg-gray-100 text-gray-500';
+                                    let statusText = 'ว่าง';
+
+                                    if (status === 'occupied') { cardClass = 'bg-blue-50 border-blue-200'; statusBadge = 'bg-blue-200 text-blue-700'; statusText = 'มีลูกค้า'; }
+                                    else if (status === 'payment') { cardClass = 'bg-green-50 border-green-200 ring-2 ring-green-400'; statusBadge = 'bg-green-200 text-green-700 animate-pulse'; statusText = 'รอเช็คบิล'; }
+
+                                    return (
+                                        <div key={table.id} className={`rounded-xl p-4 border shadow-sm transition-all hover:shadow-md flex flex-col justify-between h-48 ${cardClass}`}>
+                                            <div>
+                                                <div className="flex justify-between items-start mb-2"><span className="font-bold text-lg">{table.name}</span><span className={`px-2 py-0.5 rounded text-xs font-bold ${statusBadge}`}>{statusText}</span></div>
+                                                <div className="text-sm text-gray-500 mb-4">{table.zone}</div>
+                                            </div>
+                                            {tableOrders.length > 0 ? (
+                                                <div>
+                                                    <div className="flex justify-between text-sm mb-1 text-gray-600"><span>รายการ</span><span>{tableOrders.length} Order</span></div>
+                                                    <div className="flex justify-between font-bold text-lg mb-3"><span>ยอดรวม</span><span>฿{total}</span></div>
+                                                    <button onClick={() => { if(confirm(`ยืนยันการปิดบิล ${table.name} ยอด ${total} บาท?`)) closeTableBill(table.id); }} className="w-full py-2 bg-gray-800 text-white rounded-lg text-sm font-bold hover:bg-gray-700">ชำระเงิน / ปิดบิล</button>
+                                                </div>
+                                            ) : <div className="text-center text-gray-400 text-sm mt-auto">พร้อมบริการ</div>}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                );
             }
+            return null;
         }
 
-        // --- SCRATCH CARD ---
-        function initScratchCard() {
-            const canvas = document.getElementById('scratch-canvas'); if(!canvas) return;
-            const ctx = canvas.getContext('2d'); const parent = canvas.parentElement;
-            canvas.width = parent.offsetWidth; canvas.height = parent.offsetHeight;
-            ctx.fillStyle = '#fdf2f8'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#fbcfe8';
-            for(let i=0; i<30; i++) {
-                const x = Math.random() * canvas.width; const y = Math.random() * canvas.height; const size = Math.random() * 10 + 5;
-                ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.fillStyle = '#9f1239'; ctx.font = 'bold 24px Mali'; ctx.textAlign = 'center'; ctx.fillText("ขูดเลย! ❤️", canvas.width/2, canvas.height/2);
-            let isDrawing = false;
-            function getPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                let cx = e.clientX; let cy = e.clientY;
-                if(e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-                return { x: cx - rect.left, y: cy - rect.top };
-            }
-            function scratch(e) {
-                if (!isDrawing) return;
-                const pos = getPos(e); ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(pos.x, pos.y, 25, 0, Math.PI * 2); ctx.fill();
-            }
-            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); }); canvas.addEventListener('mousemove', scratch);
-            canvas.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mouseleave', () => isDrawing = false);
-            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, {passive: false}); canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); }, {passive: false});
-            canvas.addEventListener('touchend', () => isDrawing = false);
-        }
-
-        // --- MEMORIES (แก้ไขความทรงจำที่นี่) ---
-        // 🟢🟢🟢 แก้ไขรูปและข้อความหน้าความทรงจำที่นี่ 🟢🟢🟢
-        const memories = [
-            { 
-                img: '1.jpg', 
-                title: 'วันแรกที่รู้จักกัน', 
-                desc: 'เราเดินเอาลูกอมไปให้เธอเลยได้คุยกันนิดหน่อย แล้วหลังจากนั้นไม่นานเราก็ทักไปจีบเธอ' 
-            },
-            { 
-                img: '2.jpg', 
-                title: 'นับตั้งแต่เราคบกันมา', 
-                desc: ' ทุกอย่างยังชัดเจนเสมอเหมือนวันแรกที่เราคบกัน💗' 
-            },
-            { 
-              // ___ img: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80', 
-                title: 'ทริปแรก', 
-                desc: '' ___ // 
-            },
-            { 
-                img: '3.jpg', 
-                title: 'วันนี้และตลอดไป', 
-                desc: 'ไม่ว่าผ่านไปนานแค่ไหน ก็ยังอยากมีเธออยู่แบบนี้ทุกวัน' 
-            }
-        ];
-        // 🟢🟢🟢 จบการแก้ไขความทรงจำ 🟢🟢🟢
-
-        let currentMemIndex = 0;
-        function loadMemory(index) {
-            const imgEl = document.getElementById('memory-img'); const titleEl = document.getElementById('memory-title'); const descEl = document.getElementById('memory-desc');
-            const dotsContainer = document.getElementById('memory-dots');
-            
-            // Render Dots
-            dotsContainer.innerHTML = '';
-            memories.forEach((_, i) => {
-                const dot = document.createElement('div');
-                dot.className = `w-2 h-2 rounded-full transition-all dot-indicator ${i === index ? 'bg-rose-500 scale-125' : 'bg-rose-200'}`;
-                dotsContainer.appendChild(dot);
-            });
-
-            imgEl.style.opacity = 0; imgEl.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                imgEl.src = memories[index].img; titleEl.textContent = memories[index].title; descEl.textContent = memories[index].desc;
-                imgEl.style.opacity = 1; imgEl.style.transform = 'scale(1)';
-            }, 300);
-        }
-        function nextMemory() { currentMemIndex = (currentMemIndex + 1) % memories.length; loadMemory(currentMemIndex); }
-        function prevMemory() { currentMemIndex = (currentMemIndex - 1 + memories.length) % memories.length; loadMemory(currentMemIndex); }
-        loadMemory(0);
-
-        // --- LETTER ---
-        function toggleLetter(el) { el.classList.toggle('open'); if(el.classList.contains('open')) { confetti({ particleCount: 40, spread: 50, origin: { y: 0.5 }, scalar: 0.8, colors: ['#ffe4e6', '#fda4af'] }); } }
-
-        // --- QUIZ ---
-        const questions = [
-            { q: "เราเจอกันครั้งแรกที่ไหน?", a: "ร้านกาแฟ", options: ["มหาวิทยาลัย", "ร้านกาแฟ", "ออนไลน์", "งานเลี้ยง"] },
-            { q: "อาหารที่เธอชอบกินที่สุดคือ?", a: "ชาบู", options: ["ซูชิ", "ส้มตำ", "ชาบู", "พิซซ่า"] },
-            { q: "สีที่เธอชอบคือ?", a: "ชมพู", options: ["ฟ้า", "ชมพู", "ขาว", "ดำ"] },
-            { q: "วันครบรอบของเราคือ?", a: "18 ส.ค.", options: ["14 ก.พ.", "18 ส.ค.", "1 ม.ค.", "25 ธ.ค."] },
-            { q: "รักเราแค่ไหน?", a: "ที่สุดในโลก", options: ["เฉยๆ", "นิดนึง", "ที่สุดในโลก", "ไม่บอก"] }
-        ];
-        let quizIndex = 0; let score = 0;
-        function resetQuiz() { quizIndex = 0; score = 0; document.getElementById('quiz-result').classList.remove('flex'); document.getElementById('quiz-result').classList.add('hidden'); loadQuestion(); }
-        function loadQuestion() {
-            if(quizIndex >= questions.length) { showQuizResult(); return; }
-            const qData = questions[quizIndex];
-            document.getElementById('quiz-current').innerText = quizIndex + 1;
-            const qEl = document.getElementById('quiz-question'); qEl.style.opacity = 0;
-            setTimeout(() => { qEl.innerText = qData.q; qEl.style.opacity = 1; }, 200);
-            const optionsDiv = document.getElementById('quiz-options'); optionsDiv.innerHTML = '';
-            qData.options.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = "w-full py-3 bg-white/80 rounded-xl shadow-sm border border-rose-100 text-rose-800 hover:bg-rose-50 transition-all transform active:scale-95";
-                btn.style.animationDelay = `${i * 0.1}s`; btn.innerText = opt; btn.onclick = () => checkAnswer(opt, qData.a);
-                optionsDiv.appendChild(btn);
-            });
-        }
-        function checkAnswer(selected, correct) { if(selected === correct) score++; quizIndex++; loadQuestion(); }
-        function showQuizResult() {
-            document.getElementById('quiz-score-display').innerText = score;
-            const msg = document.getElementById('quiz-msg');
-            if(score === 5) msg.innerText = "สุดยอด! แฟนพันธุ์แท้ ❤️"; else if(score >= 3) msg.innerText = "เก่งมาก รักนะจุ๊บๆ"; else msg.innerText = "ไม่เป็นไรนะ รักเหมือนเดิม";
-            const res = document.getElementById('quiz-result'); res.classList.remove('hidden'); res.classList.add('flex');
-            confetti({ particleCount: 150, spread: 70 });
-        }
-
-        // --- TIMER ---
-        const startDate = new Date('2024-08-18T00:00:00'); // 🟢 แก้ไขวันที่เริ่มคบ (YYYY-MM-DD)
-        let timerInterval;
-        function startTimer() { if(timerInterval) clearInterval(timerInterval); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000); }
-        function updateTimerDisplay() {
-            const now = new Date(); const diff = now - startDate; if (diff < 0) return;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById('timer-days').innerText = days; document.getElementById('timer-hours').innerText = String(hours).padStart(2, '0');
-            document.getElementById('timer-minutes').innerText = String(minutes).padStart(2, '0'); document.getElementById('timer-seconds').innerText = String(seconds).padStart(2, '0');
-        }
-
-        // --- POLAROID ---
-        function takePhoto() {
-            const btn = document.getElementById('btn-snap'); const flash = document.getElementById('shutter-flash'); const result = document.getElementById('polaroid-result'); const dateText = document.getElementById('polaroid-date');
-            if(navigator.vibrate) navigator.vibrate(50);
-            flash.style.opacity = 1;
-            setTimeout(() => {
-                flash.style.opacity = 0; result.classList.remove('hidden'); dateText.classList.remove('hidden');
-                btn.innerHTML = '<i data-lucide="check" class="text-white w-8 h-8"></i>'; btn.classList.add('bg-green-500', 'border-green-300'); btn.classList.remove('btn-primary');
-                confetti({ particleCount: 50, spread: 40, origin: { y: 0.7 } });
-            }, 150);
-        }
-        function resetPolaroid() {
-            document.getElementById('polaroid-result').classList.add('hidden'); document.getElementById('polaroid-date').classList.add('hidden');
-            const btn = document.getElementById('btn-snap'); btn.innerHTML = '<i data-lucide="aperture" class="w-8 h-8"></i>'; btn.classList.remove('bg-green-500', 'border-green-300'); btn.classList.add('btn-primary');
-        }
-
-        // --- MUSIC ---
-        function playMusicState() { document.getElementById('vinyl').classList.remove('paused'); }
-
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
-
 
